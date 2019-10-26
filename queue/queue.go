@@ -10,18 +10,18 @@ import (
 // It will automatically close the channels for and remove subscribers whose context has ended, or buffer is full
 type Queue struct {
 	channels   map[string]channel
-	mutex      sync.Mutex
+	mutex      sync.RWMutex
 	ctx        context.Context
 	bufferSize int // The message buffer size for each subscriber to a channel
 }
 
 type channel struct {
-	queue       <-chan interface{}
+	queue       <-chan []byte
 	subscribers map[subscriber]struct{}
 }
 
 type subscriber struct {
-	channel chan<- interface{}
+	channel chan<- []byte
 	context context.Context
 }
 
@@ -35,7 +35,7 @@ func New(ctx context.Context, bufferSize int) *Queue {
 }
 
 // CreateChannel creates a new queue channel and returns a channel for broadcasting to it
-func (q *Queue) CreateChannel(channelName string) (chan<- interface{}, error) {
+func (q *Queue) CreateChannel(channelName string) (chan<- []byte, error) {
 	q.mutex.Lock()
 	defer q.mutex.Unlock()
 
@@ -44,7 +44,7 @@ func (q *Queue) CreateChannel(channelName string) (chan<- interface{}, error) {
 		return nil, fmt.Errorf("%q: channel already exists", channelName)
 	}
 
-	ch := make(chan interface{})
+	ch := make(chan []byte)
 
 	c := channel{
 		queue:       ch,
@@ -115,7 +115,7 @@ func (c *channel) removeSubscriber(s subscriber) {
 // Subscribe subscribes to a queue channel, and returns a channel for receiving messages
 // Consumers should check whether the channel is closed, as the queue may terminate subscriptions at any time
 // Returns an error if the given channel doesn't exist
-func (q *Queue) Subscribe(context context.Context, channelName string) (<-chan interface{}, error) {
+func (q *Queue) Subscribe(context context.Context, channelName string) (<-chan []byte, error) {
 	q.mutex.Lock()
 	defer q.mutex.Unlock()
 
@@ -124,7 +124,7 @@ func (q *Queue) Subscribe(context context.Context, channelName string) (<-chan i
 		return nil, fmt.Errorf("%q: channel doesn't exist", channelName)
 	}
 
-	channel := make(chan interface{}, q.bufferSize)
+	channel := make(chan []byte, q.bufferSize)
 
 	newChannel := q.channels[channelName]
 	s := subscriber{
@@ -135,4 +135,16 @@ func (q *Queue) Subscribe(context context.Context, channelName string) (<-chan i
 	q.channels[channelName] = newChannel
 
 	return channel, nil
+}
+
+// SubscriberCount returns the total count of subscribers for all channels
+func (q *Queue) SubscriberCount() (subscriberCount int) {
+	q.mutex.RLock()
+	defer q.mutex.RUnlock()
+
+	for _, channel := range q.channels {
+		subscriberCount += len(channel.subscribers)
+	}
+
+	return
 }

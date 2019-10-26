@@ -52,10 +52,10 @@ func TestSubscribe(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		channel <- "test"
+		channel <- []byte("test")
 
 		message := <-sub
-		if message != "test" {
+		if string(message) != "test" {
 			t.Fatalf("wrong message: %s", message)
 		}
 	})
@@ -73,7 +73,7 @@ func TestSubscribe(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		channel <- "test"
+		channel <- []byte("test")
 
 		_, open := <-sub
 		if open {
@@ -125,6 +125,6 @@ func TestClose(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		channel <- "test"
+		channel <- []byte("test")
 	})
 }
