@@ -91,9 +91,7 @@ func main() {
 	}()
 
 	// Start and listen on http
-	api := &api.API{
-		Queue: q,
-	}
+	api := api.New(q)
 
 	server := &http.Server{
 		Addr:    *listen,
