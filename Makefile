@@ -12,3 +12,6 @@ vet:
 
 install:
 	go install ./...
+
+package:
+	docker build -t mullvadvpn/message-queue .
