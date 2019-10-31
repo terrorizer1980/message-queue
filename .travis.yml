@@ -1,0 +1,18 @@
+language: go
+
+go:
+  - 1.x
+env:
+  - GO111MODULE=on
+
+services:
+  - redis-server
+
+script:
+  - make
+  - go test ./pubsub
+
+notifications:
+  email:
+    on_success: never
+    on_failure: never
