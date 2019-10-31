@@ -10,6 +10,7 @@ services:
 
 script:
   - make
+  - go test ./pubsub
 
 notifications:
   email:
