@@ -31,11 +31,9 @@ func TestAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	pingTimeout := time.Millisecond * 10
-
 	a := api.New(queue)
-	a.PingInterval = pingTimeout / 4
-	a.PingTimeout = pingTimeout
+	a.PingTimeout = time.Millisecond * 10
+	a.PingInterval = a.PingTimeout / 4
 
 	server := httptest.NewServer(a.Router())
 	defer server.Close()
@@ -59,9 +57,6 @@ func TestAPI(t *testing.T) {
 		}
 
 		defer c.Close(websocket.StatusNormalClosure, "")
-
-		// Sleep to make sure a few pings occurs
-		time.Sleep(pingTimeout / 2)
 
 		ch <- []byte(testMessage)
 
@@ -90,7 +85,7 @@ func TestAPI(t *testing.T) {
 
 		defer c.Close(websocket.StatusNormalClosure, "")
 
-		time.Sleep(pingTimeout)
+		time.Sleep(a.PingTimeout * 2)
 
 		// The connection should now have been closed due to ping timeouts
 		_, _, err = c.Read(ctx)
