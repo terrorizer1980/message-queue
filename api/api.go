@@ -25,8 +25,8 @@ type API struct {
 func New(q *queue.Queue) *API {
 	return &API{
 		Queue:        q,
-		PingTimeout:  time.Minute,
-		PingInterval: time.Second * 15,
+		PingTimeout:  time.Second * 15,
+		PingInterval: time.Second * 25,
 	}
 }
 
@@ -84,9 +84,6 @@ func (a *API) handleChannel(w http.ResponseWriter, r *http.Request) *handler.Err
 	// Set up reader to handle pings, but terminate the connection if we receieve any messages
 	ctx = c.CloseRead(ctx)
 
-	// Close the connection if no successful ping has occured within the ping timeout
-	pingTimer := time.AfterFunc(a.PingTimeout, cancel)
-	defer pingTimer.Stop()
 	pingTicker := time.NewTicker(a.PingInterval)
 	defer pingTicker.Stop()
 
@@ -97,19 +94,13 @@ func (a *API) handleChannel(w http.ResponseWriter, r *http.Request) *handler.Err
 			c.Close(websocket.StatusNormalClosure, "")
 			return nil
 		case <-pingTicker.C:
-			func() {
-				pingCtx, cancel := context.WithTimeout(ctx, a.PingTimeout)
-				defer cancel()
+			go func() {
+				pingCtx, pingCancel := context.WithTimeout(ctx, a.PingTimeout)
+				defer pingCancel()
 
 				err := c.Ping(pingCtx)
-
-				// Reset ping timer on successful ping response
-				if err == nil {
-					if !pingTimer.Stop() {
-						<-pingTimer.C
-					}
-
-					pingTimer.Reset(a.PingTimeout)
+				if err != nil {
+					cancel()
 				}
 			}()
 		case msg, open := <-ch:
