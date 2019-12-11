@@ -1,5 +1,5 @@
 # Golang build step
-FROM mullvadvpn/golang@sha256:4002fd88abf6894ba5ffcc87e06ee7fe6bed15c01028ce5bf662ff93df488cd3 as gobuilder
+FROM mullvadvpn/golang@sha256:0e2105f55f7137671e1b5e71108f490cf6a7f90011f7b06ba4ec0908fea1b1df as gobuilder
 RUN apt-get update && apt-get install -y git
 ADD . /message-queue
 WORKDIR /message-queue
@@ -7,7 +7,7 @@ WORKDIR /message-queue
 RUN make
 
 # Copy go binary
-FROM mullvadvpn/debian@sha256:72aa3e8b82527ed3247cf8872cddb22e82ab8821e9278ca98a055fe3317d892c
+FROM mullvadvpn/debian@sha256:c6728a03350ba492e786c02a4bdaf958fe0ba6062fe4b5a1c76609e4c3a31836
 RUN mkdir /app
 WORKDIR /app
 COPY --from=gobuilder /go/bin/message-queue .
