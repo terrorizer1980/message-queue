@@ -5,11 +5,9 @@ go:
 env:
   - GO111MODULE=on
 
-services:
-  - redis-server
-
 script:
   - make
+  - docker-compose -f test/docker-compose.yml up -d
   - go test ./pubsub
 
 notifications:

@@ -1,0 +1,13 @@
+version: '3.5'
+services:
+  redis:
+    image: redis:5.0-alpine
+    network_mode: host
+    command: '--masterauth foobar --requirepass foobar'
+
+  sentinel:
+    image: redis:5.0-alpine
+    network_mode: host
+    volumes:
+      - ./sentinel.conf:/data/sentinel.conf
+    command: redis-server /data/sentinel.conf --sentinel
