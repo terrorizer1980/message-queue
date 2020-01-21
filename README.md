@@ -9,7 +9,7 @@ This will produce a `message-queue` binary and put them in your `GOBIN`.
 
 ## Testing
 To run the tests, run `make test`.
-To run the integration tests as well, run `go test ./...`. Note that this requires redis to be running on `127.0.0.1:6379`
+To run the integration tests as well, run `go test ./...`. Note that this requires a local instance of redis and redis-sentinel.
 
 ## Usage
 All options can be either configured via command line flags, or via their respective environment variable, as denoted by `[ENVIRONMENT_VARIABLE]`.
