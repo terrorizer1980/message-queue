@@ -2,8 +2,10 @@ package pubsub
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/mediocregopher/radix/v3"
+	"github.com/mediocregopher/radix/v3/resp/resp2"
 )
 
 // PubSub is a client for recieving messages using redis pubsub
@@ -21,8 +23,33 @@ func New(serviceName string, sentinelAddrs []string, serverPass string) (*PubSub
 	}
 
 	connFunc := radix.PersistentPubSubConnFunc(func(string, string) (radix.Conn, error) {
+		// Get the primary redis server according to redis sentinel
 		primaryAddr, _ := s.Addrs()
-		return radix.Dial("tcp", primaryAddr, radix.DialAuthPass(serverPass))
+
+		// Connect to it
+		conn, err := radix.Dial("tcp", primaryAddr, radix.DialAuthPass(serverPass))
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if it has the primary role
+		var rawRoleOutput []resp2.RawMessage
+		err = conn.Do(radix.Cmd(&rawRoleOutput, "ROLE"))
+		if err != nil {
+			return nil, err
+		}
+
+		var role resp2.BulkString
+		err = rawRoleOutput[0].UnmarshalInto(&role)
+		if err != nil {
+			return nil, err
+		}
+
+		if role.S != "master" {
+			return nil, fmt.Errorf("Server is not the primary")
+		}
+
+		return conn, nil
 	})
 
 	conn, err := radix.PersistentPubSubWithOpts("", "", connFunc)

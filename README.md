@@ -18,6 +18,6 @@ To get a list of all the options, run `message-queue -h`.
 ## Packaging
 In order to deploy message-queue, we use docker.
 
-Current docker hash: `299d632e52925dca8a6fbdc56903384431b7ba33931d1f7a853503db187ecf99`
+Current docker hash: `8722d0ba33eec49c809af017f70c56cbfe6593b4b0b05c3e13012776f610b590`
 
 To build a new image, run `make package`. This will create a new image tagged as `mullvadvpn/message-queue`.
