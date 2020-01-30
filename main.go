@@ -31,7 +31,9 @@ func main() {
 	// Set up commandline flags
 	listen := flag.String("listen", ":8080", "listen address")
 	bufferSize := flag.Int("buffer-size", 100, "client buffer size")
-	redisAddress := flag.String("redis-address", "redis://127.0.0.1:6379", "redis address, may contain authentication details")
+	redisSentinelService := flag.String("redis-sentinel-service", "", "redis sentinel service name")
+	redisSentinelAddrs := flag.String("redis-sentinel-addresses", "", "comma-delimited list of redis sentinel addresses, may contain authentication details")
+	redisPassword := flag.String("redis-server-password", "", "password for the redis servers managed by redis sentinel")
 	channels := flag.String("channels", "", "comma-delimited list of channels to listen and broadcast to")
 	statsdAddress := flag.String("statsd-address", "127.0.0.1:8125", "statsd address to send metrics to")
 
@@ -40,6 +42,12 @@ func main() {
 
 	// Parse commandline flags
 	flag.Parse()
+
+	if *redisSentinelService == "" || *redisSentinelAddrs == "" || *redisPassword == "" {
+		log.Fatalf("no redis sentinel service name, addresses or redis password configured")
+	}
+
+	redisSentinelAddrList := strings.Split(*redisSentinelAddrs, ",")
 
 	if *channels == "" {
 		log.Fatalf("no channels configured")
@@ -62,7 +70,7 @@ func main() {
 	defer shutdown()
 
 	// Set up the pubsub listener
-	p, err = pubsub.New(*redisAddress)
+	p, err = pubsub.New(*redisSentinelService, redisSentinelAddrList, *redisPassword)
 	if err != nil {
 		log.Fatal("error initializing pubsub", err)
 	}
