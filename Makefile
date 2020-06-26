@@ -13,5 +13,8 @@ vet:
 install:
 	go install ./...
 
+# Return contents of VERSION and interpolate
+version := $(shell cat VERSION)
 package:
-	docker build -t mullvadvpn/message-queue .
+	docker build -t quay.io/mullvad/message-queue:$(version) .
+	docker tag quay.io/mullvad/message-queue:$(version) quay.io/mullvad/message-queue:latest
