@@ -7,7 +7,7 @@ WORKDIR /message-queue
 RUN make
 
 # Copy go binary
-FROM mullvadvpn/debian@sha256:c6728a03350ba492e786c02a4bdaf958fe0ba6062fe4b5a1c76609e4c3a31836
+FROM quay.io/mullvad/debian@sha256:c199b5d707db6f472d25eb8d78b0ff69f14e819c7affea70f9cad6a33e2b67de
 RUN mkdir /app
 WORKDIR /app
 COPY --from=gobuilder /go/bin/message-queue .
