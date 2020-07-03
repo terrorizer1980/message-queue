@@ -1,5 +1,5 @@
 # Golang build step
-FROM mullvadvpn/golang@sha256:0e2105f55f7137671e1b5e71108f490cf6a7f90011f7b06ba4ec0908fea1b1df as gobuilder
+FROM quay.io/mullvad/golang@sha256:0e2105f55f7137671e1b5e71108f490cf6a7f90011f7b06ba4ec0908fea1b1df as gobuilder
 RUN apt-get update && apt-get install -y git
 ADD . /message-queue
 WORKDIR /message-queue
