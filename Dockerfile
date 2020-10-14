@@ -1,5 +1,5 @@
-# Golang build step
-FROM quay.io/mullvad/golang@sha256:0e2105f55f7137671e1b5e71108f490cf6a7f90011f7b06ba4ec0908fea1b1df as gobuilder
+# Golang build step / Debian Buster 20-09 / Golang 1.15.2
+FROM quay.io/mullvad/golang@sha256:1d7a70635fb0b7703984db2d0655f710ff9c13ff2c8ec4db023b03c17b1d3034 as gobuilder
 RUN apt-get update && apt-get install -y git
 ADD . /message-queue
 WORKDIR /message-queue
@@ -7,7 +7,7 @@ WORKDIR /message-queue
 RUN make
 
 # Copy go binary
-FROM quay.io/mullvad/debian@sha256:c199b5d707db6f472d25eb8d78b0ff69f14e819c7affea70f9cad6a33e2b67de
+FROM quay.io/mullvad/debian@sha256:f49f6dc4d85279a57bedfb9a725bd01ec1ec3ec1f0b1a5d5effe91361f3d073a
 RUN mkdir /app
 WORKDIR /app
 COPY --from=gobuilder /go/bin/message-queue .

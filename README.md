@@ -28,5 +28,5 @@ Current docker repo digests:
 
 |   tag    |                                             repo path                                             |
 |:--------:|:-------------------------------------------------------------------------------------------------:|
-| `latest` |   `quay.io/mullvad/message-queue@sha256:8722d0ba33eec49c809af017f70c56cbfe6593b4b0b05c3e13012776f610b590`    |
+| `1.0.0-buster-20.09`  | `quay.io/mullvad/message-queue@sha256:d319005c398ee068afc0967030e56a9c2d4515d52e65440c26a8e17c89e216ba` |
 | `1.0.0`  | `quay.io/mullvad/message-queue@sha256:8722d0ba33eec49c809af017f70c56cbfe6593b4b0b05c3e13012776f610b590` |
