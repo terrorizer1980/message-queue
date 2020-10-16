@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y git
 ADD . /message-queue
 WORKDIR /message-queue
 # Run golang tests
-RUN make
+RUN make all
 
 # Copy go binary
 FROM quay.io/mullvad/debian@sha256:f49f6dc4d85279a57bedfb9a725bd01ec1ec3ec1f0b1a5d5effe91361f3d073a
