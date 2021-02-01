@@ -1,8 +1,9 @@
 .PHONY: fmt test vet install build
 
-NAME = message-queue
-REPO = quay.io/mullvad
-VERSION = $(file < VERSION)
+NAME := message-queue
+REPO := quay.io/mullvad
+VERSION_FILE := VERSION
+VERSION := $(shell cat ${VERSION_FILE})
 
 build:
 	docker build -t $(REPO)/$(NAME):$(VERSION) -f Dockerfile .
