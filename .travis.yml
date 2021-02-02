@@ -6,7 +6,7 @@ env:
   - GO111MODULE=on
 
 script:
-  - make
+  - make all
   - docker-compose -f test/docker-compose.yml up -d
   - go test ./pubsub
 
