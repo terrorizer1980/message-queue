@@ -16,7 +16,27 @@ type PubSub struct {
 }
 
 // New creates a new PubSub client and establishes the connection to redis
-func New(serviceName string, sentinelAddrs []string, serverPass string) (*PubSub, error) {
+func New(address string, password string) (*PubSub, error) {
+	connFunc := radix.PersistentPubSubConnFunc(func(string, address string) (radix.Conn, error) {
+		return radix.Dial("tcp", address, radix.DialAuthPass(password))
+	})
+
+	conn, err := radix.PersistentPubSubWithOpts("tcp", address, connFunc)
+	if err != nil {
+		// This should never happen since we don't set a retry limit on the connection above
+		return nil, err
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	return &PubSub{
+		conn:   conn,
+		ctx:    ctx,
+		cancel: cancel,
+	}, nil
+}
+
+// NewWithSentinel creates a new PubSub client and establishes the connection to redis using sentinel
+func NewWithSentinel(serviceName string, sentinelAddrs []string, serverPass string) (*PubSub, error) {
 	s, err := radix.NewSentinel(serviceName, sentinelAddrs)
 	if err != nil {
 		return nil, err

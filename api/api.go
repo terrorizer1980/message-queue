@@ -77,6 +77,7 @@ func (a *API) handleChannel(w http.ResponseWriter, r *http.Request) *handler.Err
 	defer c.Close(websocket.StatusInternalError, "the sky is falling")
 
 	if c.Subprotocol() != subProtocol {
+		log.Println("refusing client connection: invalid subprotocol")
 		c.Close(websocket.StatusPolicyViolation, "client must speak the correct subprotocol")
 		return nil
 	}
