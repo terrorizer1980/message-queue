@@ -12,4 +12,6 @@ RUN mkdir /app
 WORKDIR /app
 COPY --from=gobuilder /go/bin/message-queue .
 
+EXPOSE 8080
+
 CMD ["./message-queue"]
