@@ -21,9 +21,8 @@ func New(address string, password string) (*PubSub, error) {
 		return radix.Dial("tcp", address, radix.DialAuthPass(password))
 	})
 
-	conn, err := radix.PersistentPubSubWithOpts("tcp", address, connFunc)
+	conn, err := radix.PersistentPubSubWithOpts("tcp", address, connFunc, radix.PersistentPubSubAbortAfter(3))
 	if err != nil {
-		// This should never happen since we don't set a retry limit on the connection above
 		return nil, err
 	}
 
