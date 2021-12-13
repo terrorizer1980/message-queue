@@ -1,0 +1,43 @@
+name: Add PR to project
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+jobs:
+  pr2project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add PR to project
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          PR_ID: ${{ github.event.pull_request.node_id }}
+          PROJECT_ID: MDExOlByb2plY3ROZXh0MzM1MQ==
+          STATUS_FIELD_ID: MDE2OlByb2plY3ROZXh0RmllbGQyNzYxMA==
+          IN_REVIEW_OPTION_ID: 16912349
+        run: |
+          item_id="$( gh api graphql -f query='
+            mutation($project:ID!, $pr:ID!) {
+              addProjectNextItem(input: {projectId: $project, contentId: $pr}) {
+                projectNextItem {
+                  id
+                }
+              }
+            }' -f project=$PROJECT_ID -f pr=$PR_ID --jq '.data.addProjectNextItem.projectNextItem.id')"
+          gh api graphql -f query='
+            mutation (
+              $project: ID!
+              $item: ID!
+              $status_field: ID!
+              $status_value: String!
+            ) {
+              set_status: updateProjectNextItemField(input: {
+                projectId: $project
+                itemId: $item
+                fieldId: $status_field
+                value: $status_value
+              }) {
+                projectNextItem {
+                  id
+                  }
+              }
+            }' -f project=$PROJECT_ID -f item=$item_id -f status_field=$STATUS_FIELD_ID -f status_value=$IN_REVIEW_OPTION_ID
+
