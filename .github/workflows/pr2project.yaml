@@ -6,7 +6,17 @@ jobs:
   pr2project:
     runs-on: ubuntu-latest
     steps:
-      - name: Add PR to project
+      - name: Assign author
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { repo, payload: { pull_request: { number, user: { login } } } } = context;
+            await github.rest.issues.addAssignees({
+              ...repo,
+              issue_number: number,
+              assignees: [login],
+            })
+      - name: Add to project board
         env:
           GITHUB_TOKEN: ${{ secrets.PROJECT_TOKEN }}
           PR_ID: ${{ github.event.pull_request.node_id }}
