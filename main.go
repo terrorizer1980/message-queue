@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"strings"
 	"syscall"
 	"time"
@@ -16,10 +17,38 @@ import (
 	"github.com/infosum/statsd"
 	"github.com/mullvad/message-queue/pubsub"
 	"github.com/mullvad/message-queue/queue"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/jamiealquiza/envy"
 	"github.com/mullvad/message-queue/api"
 )
+
+// Build information populated as build-time.
+var (
+	Version   string
+	Branch    string
+	Revision  string
+	GoVersion = runtime.Version()
+)
+
+// init creates a metrics about current version information.
+func init() {
+	promauto.NewGauge(
+		prometheus.GaugeOpts{
+			Namespace: "messagequeue",
+			Name:      "build_info",
+			Help:      "A metric with a constant '1' value labeled by version, branch, revision and goversion from which message-queue was built.",
+			ConstLabels: prometheus.Labels{
+				"version":   Version,
+				"branch":    Branch,
+				"revision":  Revision,
+				"goversion": GoVersion,
+			},
+		},
+	).Set(1)
+}
 
 var (
 	metrics *statsd.Client
@@ -113,6 +142,14 @@ func main() {
 				return
 			}
 		}
+	}()
+
+	// Expose prometheus metrics
+	go func() {
+		log.Printf("Exposing metrics on port 9999")
+		server := http.NewServeMux()
+		server.Handle("/metrics", promhttp.Handler())
+		log.Fatal(http.ListenAndServe(":9999", server))
 	}()
 
 	// Start and listen on http
