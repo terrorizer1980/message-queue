@@ -85,10 +85,6 @@ func main() {
 		log.Fatalf("'-redis-sentinel-service' is required when using redis sentinel")
 	}
 
-	if *redisPassword == "" {
-		log.Fatalf("'-redis-server-password' is required")
-	}
-
 	redisSentinelAddrList := strings.Split(*redisSentinelAddrs, ",")
 
 	if *channels == "" {
