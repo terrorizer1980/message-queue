@@ -8,14 +8,17 @@ jobs:
     steps:
       - name: Assign author
         uses: actions/github-script@v6
+        continue-on-error: true
         with:
           script: |
-            const { repo, payload: { pull_request: { number, user: { login } } } } = context;
-            await github.rest.issues.addAssignees({
-              ...repo,
-              issue_number: number,
-              assignees: [login],
-            })
+            const { repo, payload: { pull_request: { number, user } } } = context;
+            if (user.type === "User") {
+              await github.rest.issues.addAssignees({
+                ...repo,
+                issue_number: number,
+                assignees: [user.login],
+              })
+            }
       - name: Add to project board
         env:
           GITHUB_TOKEN: ${{ secrets.PROJECT_TOKEN }}
